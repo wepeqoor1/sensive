@@ -50,18 +50,17 @@ def serialize_tag_optimized(tag):
 
 
 def index(request):
-    # 1. Достать id самых популярных постов (annotate по лайкам)
     most_popular_posts = Post.objects.popular() \
-            .prefetch_related('author')[:5] \
+            .prefetch_related('author', 'tags')[:5] \
             .fetch_with_comments_count()
 
     most_fresh_posts = list(
         Post.objects.annotate(comments_count=Count('comments'))
-        .prefetch_related('author')
+        .prefetch_related('author', 'tags')
         .order_by('published_at')
     )[-5:]
 
-    most_popular_tags = Tag.objects.popular()[:5]
+    most_popular_tags = Tag.objects.popular().prefetch_related('posts')[:5]
 
     context = {
         'most_popular_posts': [
