@@ -10,7 +10,10 @@ class PostQuerySet(models.QuerySet):
 
     def prefetch_tags_authors(self):
         tags_with_annotation = Tag.objects.annotate(posts_count=Count("posts"))
-        posts_with_tags_authors = self.prefetch_related("author", Prefetch("tags", queryset=tags_with_annotation))
+        posts_with_tags_authors = self.select_related("author").prefetch_related(
+            Prefetch("tags", queryset=tags_with_annotation)
+        )
+
         return posts_with_tags_authors
 
     def fetch_with_comments_count(self):
